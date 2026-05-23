@@ -1,4 +1,4 @@
-# Week-1: Introspection & Docs
+# Introspection & Docs
 
 ## Summary
 
