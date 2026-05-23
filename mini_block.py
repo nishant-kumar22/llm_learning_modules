@@ -17,10 +17,14 @@ class MiniBlock(nn.Module):
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
-    def forward(self, x):
+    def forward(self, x, return_att=False):
         B, T, C = x.shape
         qkv = self.qkv(x).view(B, T, 3, self.n_head, self.head_dim)
         q, k, v = qkv.unbind(dim=2)
+
+        q = q.permute(0, 2, 1, 3)
+        k = k.permute(0, 2, 1, 3)
+        v = v.permute(0, 2, 1, 3)
 
         att = (q @ k.transpose(-2, -1)) / math.sqrt(self.head_dim)
         att = att.softmax(dim=-1)
@@ -29,4 +33,6 @@ class MiniBlock(nn.Module):
 
         x = self.ln1(x + self.proj(y))  # residual 1
         x = self.ln2(x + self.ff(x))    # residual 2
+        if return_att:
+            return x, att
         return x
